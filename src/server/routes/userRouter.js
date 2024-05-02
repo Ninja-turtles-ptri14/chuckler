@@ -81,6 +81,6 @@ router.post(
 router.get("/verify", tokenController.verifyToken, (req, res) => {
   return res.status(200).json("Requesting user is authorized");
 });
-router.get("/chat",chatController.getPreviousMessages)
-router.post('/send',chatController.sendMessage);
+router.get("/chat", chatController.getPreviousMessages);
+router.post("/send", chatController.sendMessage);
 module.exports = router;

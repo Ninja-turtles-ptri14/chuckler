@@ -127,7 +127,6 @@ userController.getUserJokes = async (req, res, next) => {
 userController.getUserProfile = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-    
     const userInfo = await userModel.getUserById(id);
 
     const getObjectParams =  {
@@ -140,7 +139,6 @@ userController.getUserProfile = async (req, res, next) => {
 
     userInfo['user_picture'] = url;
     res.locals.userInfo = userInfo;
-
     return next();
 
   } catch (err) {
@@ -153,9 +151,9 @@ userController.getUserProfile = async (req, res, next) => {
 
 userController.setUserPicture = async(req,res,next)=>{
   const id = res.locals.userInfo.id;
-  console.log('req.file',req.file);
   const imageName = randomImageName();
   const buffer = await sharp(req.file.buffer).resize(400,500,'contain').toBuffer(); // resizes picture
+
   const params = {
     Bucket:bucketName,
     Key:imageName,

@@ -10,11 +10,11 @@ const PORT = process.env.PORT;
 const jwt = require('jsonwebtoken');
 
 // Routers
-const jokeRouter = require('./routes/jokeRouter');
-const userRouter = require('./routes/userRouter');
-const matchRouter = require('./routes/matchRouter');
-const websocketRouter = require('./routes/websocketsRouter');
-const db = require('../db/db');
+const jokeRouter = require("./routes/jokeRouter");
+const userRouter = require("./routes/userRouter");
+const matchRouter = require("./routes/matchRouter");
+const websocketRouter = require("./routes/websocketsRouter");
+const db = require("../db/db");
 
 // create the express server
 const app = express();
@@ -24,27 +24,29 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(cookieParser());
 // serve static files from the build file
-app.use(express.static('build'));
+app.use(express.static("build"));
 
 // routers
-app.use('/api/user', userRouter);
+app.use("/api/user", userRouter);
 
-app.use('/api/joke', jokeRouter);
+app.use("/api/joke", jokeRouter);
 
-app.use('/api/match', matchRouter);
+app.use("/api/match", matchRouter);
 
 
 
 
 // catch-all route handler
-app.use((req, res) => { res.status(404).send('!!Page not found!!'); });
+app.use((req, res) => {
+  res.status(404).send("!!Page not found!!");
+});
 
 // global error handler
 app.use((err, req, res) => {
   const defaultErr = {
-    log: 'Express error handler caught unknown middleware error',
+    log: "Express error handler caught unknown middleware error",
     status: 500,
-    message: { err: 'An error occurred' },
+    message: { err: "An error occurred" },
   };
   const errorObj = Object.assign({}, defaultErr, err);
   console.log(errorObj.log);
@@ -54,7 +56,7 @@ app.use((err, req, res) => {
 // set up the server to handle websocket connections
 const wss = new WebSocket.WebSocketServer({ server });
 
-wss.on('connection', (socket, request) => {
+wss.on("connection", (socket, request) => {
   websocketRouter(socket, request, wss);
 });
 
