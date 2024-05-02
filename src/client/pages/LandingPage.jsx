@@ -13,15 +13,15 @@ export default function LandingPage() {
   const [openSignIn, setOpenSignIn] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
   
-  useEffect(() => {
-    Axios.get('/api/user/verify')
-      .then((request) => {
-        if (request.data) {
-          location.assign('/main');
-          return;
-        }
-      });
-  }, []);
+  // useEffect(() => {
+  //   Axios.get('/api/user/verify')
+  //     .then((request) => {
+  //       if (request.data) {
+  //         location.assign('/main');
+  //         return;
+  //       }
+  //     });
+  // }, []);
 
   return (
     <div className='chuckler-container'>

@@ -28,9 +28,9 @@ export default function Home () {
         }
         } catch (error) {console.log('Error trying to fetch joke', error)}
     };
-    useEffect(() => {
-        getJoke();
-    }, [])
+    // useEffect(() => {
+    //     getJoke();
+    // }, [])
     const handleYesClick = async (e) => {
         e.preventDefault();
         try {
