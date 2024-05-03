@@ -46,6 +46,7 @@ jokeModel.getJokeById = async (jokeId)=>{
   SELECT content
   FROM jokes
   WHERE joke_id=$1`
+  
   const getJokeResult = await db.query(getJokeQuery,[jokeId]);
   return getJokeResult.rows[0].content;
 }
