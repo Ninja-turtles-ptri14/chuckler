@@ -41,4 +41,14 @@ jokeModel.deleteJoke = async (jokeId) => {
   return deletedJokeResult.rows[0];
 };
 
+jokeModel.getJokeById = async (jokeId) => {
+  const getJokeByIdQuery = `
+  SELECT content
+  FROM jokes
+  WHERE joke_id = $1`;
+
+  const result = await db.query(getJokeByIdQuery, [jokeId]);
+  return result.rows[0];
+};
+
 module.exports = jokeModel;

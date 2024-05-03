@@ -4,6 +4,23 @@ const userModel = require("../models/userModel");
 
 const jokeController = {};
 
+jokeController.getJokeById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const joke = await jokeModel.getJokeById(id);
+    res.locals.joke = joke;
+    console.log("joke ", joke);
+
+    return next();
+  } catch (err) {
+    return next({
+      log: `Error in postJoke middleware: ${err}`,
+      message: `Error posting joke: ${err}`,
+    });
+  }
+};
+
 // post a joke to the database
 jokeController.postJoke = async (req, res, next) => {
   try {

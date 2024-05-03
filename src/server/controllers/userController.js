@@ -1,9 +1,37 @@
 const db = require("../../db/db");
 const userModel = require("../models/userModel");
 const jokeModel = require("../models/jokeModel");
+const matchModel = require("../models/matchModel");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+require("dotenv").config();
 const userController = {};
+//s3 stuff
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
+const crypto = require("crypto");
+const sharp = require("sharp");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKeyId = process.env.ACCESS_KEY;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+
+const s3 = new S3Client({
+  region: bucketRegion,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+});
+
+const randomImageName = (bytes = 32) =>
+  crypto.randomBytes(bytes).toString("hex");
+
 userController.createUser = async (req, res, next) => {
   try {
     const { email, username, password, joke } = req.body;
@@ -42,7 +70,6 @@ userController.createUser = async (req, res, next) => {
 userController.verifyUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
     // Check if user exists
     const user = await userModel.getUserByEmail(email);
     if (!user) return res.status(404).json("User not found");
@@ -70,10 +97,17 @@ userController.verifyUser = async (req, res, next) => {
 userController.getUserMatches = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-
+    const matches = [];
     // Get matches by user id
-    const user_matches = await userModel.getUserMatches(id);
-    res.locals.matches = user_matches;
+    const user_matchIds = await userModel.getUserMatches(id);
+    console.log("match ids: ", user_matchIds);
+    // for (const match_id of user_matchIds) {
+    //   const matchData = await matchModel.getMatchById(match_id);
+    //   console.log("matchid match data: ", matchData);
+    //   if (matchData) matches.push(matchData);
+    // }
+
+    res.locals.matches = user_matchIds;
 
     return next();
   } catch (err) {
@@ -108,7 +142,18 @@ userController.getUserProfile = async (req, res, next) => {
     const { id } = res.locals.userInfo;
 
     const userInfo = await userModel.getUserById(id);
+    console.log("userInfo: ", userInfo);
     res.locals.userInfo = userInfo;
+    if (!userInfo.user_picture) return next(); // Check if null
+
+    const getObjectParams = {
+      Bucket: bucketName,
+      Key: userInfo.user_picture,
+    };
+
+    const command = new GetObjectCommand(getObjectParams);
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    res.locals.userInfo.user_picture = url;
 
     return next();
   } catch (err) {
@@ -117,6 +162,27 @@ userController.getUserProfile = async (req, res, next) => {
       message: `Error fetching user profile: ${err}`,
     });
   }
+};
+
+userController.setUserPicture = async (req, res, next) => {
+  const id = res.locals.userInfo.id;
+  const imageName = randomImageName();
+  const buffer = await sharp(req.file.buffer)
+    .resize(400, 500, "contain")
+    .toBuffer(); // resizes picture
+
+  const params = {
+    Bucket: bucketName,
+    Key: imageName,
+    Body: buffer,
+    ContentType: req.file.mimetype,
+  };
+
+  const command = new PutObjectCommand(params);
+
+  await s3.send(command);
+  await userModel.setUserPicture(imageName, id);
+  return next();
 };
 
 //set's user's online status to true

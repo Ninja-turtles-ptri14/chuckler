@@ -14,6 +14,15 @@ router.post(
   }
 );
 
+router.get(
+  "/:id",
+  tokenController.verifyToken,
+  jokeController.getJokeById,
+  (req, res) => {
+    return res.status(200).json(res.locals.joke);
+  }
+);
+
 router.patch(
   "/update",
   tokenController.verifyToken,
