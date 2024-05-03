@@ -1,9 +1,8 @@
 const sql = require("../../db/db");
 const userModel = require("../models/userModel");
 const matchModel = require("../models/matchModel");
-const jokeModel = require("../models/matchModel");
+const jokeModel = require("../models/jokeModel");
 const matchController = {};
-
 matchController.checkMatch = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
@@ -56,10 +55,14 @@ matchController.getPotentialMatch = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
     const fetchedUser = await matchModel.getPotentialMatch(id);
-    console.log("fetched User: ", fetchedUser);
+    const jokes = [];
 
+    for(const j of fetchedUser['jokes_posted_id']) jokes.push(await jokeModel.getJokeById(j));
+
+    fetchedUser['jokes_posted_id'] = jokes;
     res.locals.fetchedUser = fetchedUser;
     return next();
+
   } catch (err) {
     return next({
       log: `Error in getPotentialMatch middleware: ${err}`,
