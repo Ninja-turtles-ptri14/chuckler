@@ -1,6 +1,7 @@
 const sql = require("../../db/db");
 const userModel = require("../models/userModel");
 const matchModel = require("../models/matchModel");
+const jokeModel = require("../models/matchModel");
 const matchController = {};
 
 matchController.checkMatch = async (req, res, next) => {
@@ -56,6 +57,7 @@ matchController.getPotentialMatch = async (req, res, next) => {
     const { id } = res.locals.userInfo;
     const fetchedUser = await matchModel.getPotentialMatch(id);
     console.log("fetched User: ", fetchedUser);
+
     res.locals.fetchedUser = fetchedUser;
     return next();
   } catch (err) {

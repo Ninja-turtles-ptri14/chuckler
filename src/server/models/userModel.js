@@ -78,21 +78,21 @@ userModel.getPrefById = async (id) => {
   return result.rows[0];
 };
 
-userModel.getUserPicture = async(id)=>{
+userModel.getUserPicture = async (id) => {
   const getUserPictureQuery = `
   SELECT user_picture
   FROM users WHERE id = $1`;
 
-const result = await db.query(getUserPictureQuery,[id]);
-return result.rows[0];
-}
+  const result = await db.query(getUserPictureQuery, [id]);
+  return result.rows[0];
+};
 
-userModel.setUserPicture = async (imageName,id)=>{
+userModel.setUserPicture = async (imageName, id) => {
   const setUserPictureQuery = `
   UPDATE users SET 
   user_picture = $1 WHERE id=$2
-  `
-  const result = await db.query(setUserPictureQuery,[imageName,id])
+  `;
+  const result = await db.query(setUserPictureQuery, [imageName, id]);
   return result.rows[0];
-}
+};
 module.exports = userModel;

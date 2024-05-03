@@ -1,24 +1,19 @@
-const express = require('express');
-const WebSocket = require('ws');
-const path = require('path');
-const http = require('http');
-const cookieParser = require('cookie-parser');
-require('dotenv').config();
-const PORT = process.env.PORT;
-
-
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const configureSocket = require("./sockets/socket");
+require("dotenv").config();
 
 // Routers
 const jokeRouter = require("./routes/jokeRouter");
 const userRouter = require("./routes/userRouter");
 const matchRouter = require("./routes/matchRouter");
-const websocketRouter = require("./routes/websocketsRouter");
-const db = require("../db/db");
+
+const PORT = process.env.PORT;
 
 // create the express server
 const app = express();
-const server = http.createServer(app);
+const io = configureSocket(app);
 
 // parse incoming json
 app.use(express.json());
@@ -32,9 +27,6 @@ app.use("/api/user", userRouter);
 app.use("/api/joke", jokeRouter);
 
 app.use("/api/match", matchRouter);
-
-
-
 
 // catch-all route handler
 app.use((req, res) => {
@@ -54,14 +46,15 @@ app.use((err, req, res) => {
 });
 
 // set up the server to handle websocket connections
-const wss = new WebSocket.WebSocketServer({ server });
+// const wss = new WebSocket.WebSocketServer({ server });
 
-wss.on("connection", (socket, request) => {
-  websocketRouter(socket, request, wss);
-});
+// wss.on("connection", (socket, request) => {
+//   websocketRouter(socket, request, wss);
+// });
 
 // set up the server to listen for http requests
-server.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`App is listening on port ${PORT}`);
 });
+
 module.exports = app;
