@@ -14,7 +14,7 @@ tokenController.verifyToken = (req, res, next) => {
 
   // Store userInfo for next controller middleware
   res.locals.userInfo = jwt.verify(token, secretKey);
-  console.log(req.file);
+
   // Important console log for debugging
   console.log("User successfully authorized\n userInfo: ", res.locals.userInfo);
 
