@@ -100,17 +100,21 @@ userController.getUserMatches = async (req, res, next) => {
     const matches = [];
     // Get matches by user id
     const user_matchIds = await userModel.getUserMatches(id);
-    console.log("match ids: ", user_matchIds);
-    // for (const match_id of user_matchIds) {
-    //   const matchData = await matchModel.getMatchById(match_id);
-    //   console.log("matchid match data: ", matchData);
-    //   if (matchData) matches.push(matchData);
-    // }
+    for (const match_id of user_matchIds) {
+      const match = await matchModel.getMatchById(match_id);
 
-    res.locals.matches = user_matchIds;
+      // Assign identity
+      const other_user_id =
+        match.user_id_1 === id ? match.user_id_2 : match.user_id_1;
+      match.other_user = await userModel.getProfileById(other_user_id);
+      matches.push(match);
+    }
+
+    res.locals.matches = matches;
 
     return next();
   } catch (err) {
+    console.log("hit error here", err);
     return next({
       log: `Error in getUserMatches middleware: ${err}`,
       message: `Error getting user matches: ${err}`,
