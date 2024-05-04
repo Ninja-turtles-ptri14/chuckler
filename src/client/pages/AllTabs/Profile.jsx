@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import '../../stylesheets/profile.css'
 import userProfileIcon from '../../images/userProfile.png';
 import { useNavigate, } from 'react-router-dom';
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from '../../context/AuthContext.jsx';
 
 export default function Profile({ userData }) {
     const [profileImage, setProfileImage] = useState(userProfileIcon);
@@ -12,7 +12,7 @@ export default function Profile({ userData }) {
 
     const { user } = useContext(AuthContext);
     const token = user.token;
-    const header = { headers: { Authorization: `Bearer ${token}` } };
+    // const header = { headers: { Authorization: `Bearer ${token}` } };
     
     const selectImg = (e) => {
         const img = e.target.files;
@@ -29,9 +29,9 @@ export default function Profile({ userData }) {
                 method: 'POST',
                 body: JSON.stringify({ image: profileImage }),
                 headers: {
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                },
-                // Authorization: `Bearer ${token}`
+                }
             });
         } catch (err) {
             console.error(`Could not set new profile image. Error: ${err}`);
