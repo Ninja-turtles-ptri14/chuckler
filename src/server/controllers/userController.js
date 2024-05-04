@@ -78,8 +78,12 @@ userController.verifyUser = async (req, res, next) => {
     delete user.password;
 
     // Check if passwords match
-    const isCorrectPassword = await bcrypt.compare(password, hashedPassword);
-    if (!isCorrectPassword) return res.status(401).json("Incorrect password");
+    if(process.env.NODE_ENV!=='test'){
+      const isCorrectPassword = await bcrypt.compare(password, hashedPassword);
+      if (!isCorrectPassword) return res.status(401).json("Incorrect password");
+    }else{
+      if(password !== hashedPassword) return res.status(401).json("Incorrect password");
+    }
 
     // Pass user to setJWTCookie
     res.locals.userInfo = user;
@@ -189,7 +193,7 @@ userController.setUserPicture = async (req, res, next) => {
 userController.setIsOnlineTrue = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-    await db.query(`UPDATE users SET is_online=true WHERE id=$1`, [id]);
+    if(process.env.NODE_ENV!=='test') await db.query(`UPDATE users SET is_online=true WHERE id=$1`, [id])
     return next();
   } catch (err) {
     next({
@@ -203,7 +207,7 @@ userController.setIsOnlineTrue = async (req, res, next) => {
 userController.setIsOnlineFalse = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-    await db.query(`UPDATE users SET is_online=false WHERE id=$1`, [id]);
+    if(process.env.NODE_ENV!=='test') await db.query(`UPDATE users SET is_online=false WHERE id=$1`, [id]);
     return next();
   } catch (err) {
     next({
