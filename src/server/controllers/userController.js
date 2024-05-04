@@ -3,7 +3,29 @@ const userModel = require("../models/userModel");
 const jokeModel = require("../models/jokeModel");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+require('dotenv').config();
 const userController = {};
+//s3 stuff
+const {S3Client,PutObjectCommand,GetObjectCommand} = require('@aws-sdk/client-s3');
+const crypto = require('crypto');
+const sharp = require('sharp');
+const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
+
+const bucketName=process.env.BUCKET_NAME
+const bucketRegion=process.env.BUCKET_REGION
+const accessKeyId=process.env.ACCESS_KEY
+const secretAccessKey=process.env.SECRET_ACCESS_KEY
+
+const s3 = new S3Client({
+  region:bucketRegion,
+  credentials:{
+    accessKeyId,
+    secretAccessKey,
+  }
+});
+
+const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+
 userController.createUser = async (req, res, next) => {
   try {
     const { email, username, password, joke } = req.body;
@@ -42,7 +64,6 @@ userController.createUser = async (req, res, next) => {
 userController.verifyUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
     // Check if user exists
     const user = await userModel.getUserByEmail(email);
     if (!user) return res.status(404).json("User not found");
@@ -106,11 +127,22 @@ userController.getUserJokes = async (req, res, next) => {
 userController.getUserProfile = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-
+    
     const userInfo = await userModel.getUserById(id);
+
+    const getObjectParams =  {
+      Bucket:bucketName,
+      Key:userInfo['user_picture']
+    }
+
+    const command = new GetObjectCommand(getObjectParams)
+    const url = await getSignedUrl(s3,command,{expiresIn:3600});
+
+    userInfo['user_picture'] = url;
     res.locals.userInfo = userInfo;
 
     return next();
+
   } catch (err) {
     return next({
       log: `Error in getUserProfile middleware: ${err}`,
@@ -119,6 +151,24 @@ userController.getUserProfile = async (req, res, next) => {
   }
 };
 
+userController.setUserPicture = async(req,res,next)=>{
+  const id = res.locals.userInfo.id;
+  console.log('req.file',req.file);
+  const imageName = randomImageName();
+  const buffer = await sharp(req.file.buffer).resize(400,500,'contain').toBuffer(); // resizes picture
+  const params = {
+    Bucket:bucketName,
+    Key:imageName,
+    Body:buffer,
+    ContentType:req.file.mimetype,
+  } 
+
+  const command = new PutObjectCommand(params);
+
+  await s3.send(command);
+  await userModel.setUserPicture(imageName,id);
+  return next();
+}
 //set's user's online status to true
 userController.setIsOnlineTrue = async (req, res, next) => {
   try {

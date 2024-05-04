@@ -12,13 +12,14 @@ import Axios from "axios";
 export default function Main({ userData }) {
   const [file,setFile] = useState();
   const [caption, setCaption] = useState("");
+
   const submit = async event =>{
     event.preventDefault()
 
     const formData = new FormData();
     formData.append("image",file);
     formData.append("caption",caption)
-    await Axios.post('/api/posts',formData,{headers:{"Content-Type":"multipart/form-data"}})
+    await Axios.post('/api/user/picture',formData,{headers:{"Content-Type":"multipart/form-data"}})
   }
 
   const fileSelected = e =>{
