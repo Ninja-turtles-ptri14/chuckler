@@ -91,16 +91,6 @@ const Signin = ({ setIndex, closeModal }) => {
             />
           </div>
           <div className="input">
-            <img src={userIcon} alt="" style={{ width: "30px" }} />
-            <input
-              type="text"
-              placeholder="username"
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-            />
-          </div>
-          <div className="input">
             <img
               src={passwordIcon}
               alt="password-icon"
