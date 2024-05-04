@@ -10,22 +10,18 @@ import TabNavItem from "./Components/TabNavItem.jsx";
 import Axios from "axios";
 
 export default function Main({ userData }) {
-  // const [file,setFile] = useState();
-  // const [caption, setCaption] = useState("");
 
-  // const submit = async event =>{
-  //   event.preventDefault()
+  const [file,setFile] = useState();
+  const [caption, setCaption] = useState("");
 
-  //   const formData = new FormData();
-  //   formData.append("image",file);
-  //   formData.append("caption",caption)
-  //   await Axios.post('/api/user/picture',formData,{headers:{"Content-Type":"multipart/form-data"}})
-  // }
+  const submit = async event =>{
+    event.preventDefault()
 
-  // const fileSelected = e =>{
-  //   const file = e.target.files[0]
-  //   setFile(file);
-  // }
+    const formData = new FormData();
+    formData.append("image",file);
+    formData.append("caption",caption)
+    await Axios.post('/api/user/picture',formData,{headers:{"Content-Type":"multipart/form-data"}})
+  }
 
   const [activeTab, setActiveTab] = useState("tab1");
   // fetch('/api/user/verify').then(data=>data.text()).then(data=>{if(data==='false') location.assign('/')})

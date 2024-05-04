@@ -60,17 +60,34 @@ export default function Home () {
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 'userId': currUserId }) 
-                })
-                const parsedJoke = await joke.json();
-                console.log('joke here',parsedJoke);
-                setJoke(parsedJoke);
-        }
-        } catch (error) {console.log('Error trying to fetch joke', error)}
-    };
-    // useEffect(() => {
-    //     getJoke();
-    // }, [])
+                    body: JSON.stringify({ userId: match.id}),
+                    Authorization : `Bearer ${token}`,
+                }
+            )
+            console.log('skipResponse', skipResponse);
+            getMatch();
+        } catch (error) {console.log('Error trying to skip user', error)}
+    }
+
+    const getMatch = async () => {
+        try {
+            const matchResponse = await fetch('/api/match/fetch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json',
+                'Authorization' : `Bearer ${token}`}
+            });
+            const parsedMatch = await matchResponse.json();
+            console.log("parsedMatch", parsedMatch);
+            parsedMatch.jokes_posted_id.forEach(id => {
+                //todo: get the joke content from the id
+            })
+            setMatch(parsedMatch);
+        } catch (error) {console.log('Error trying to fetch match', error)}
+    }
+    useEffect(() => {
+        getMatch();
+    }, [])
+  
     const handleYesClick = async (e) => {
         e.preventDefault();
         try {
