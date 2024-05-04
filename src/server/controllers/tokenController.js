@@ -29,7 +29,8 @@ tokenController.setJWTCookie = (req, res, next) => {
   // Create token and store in cookie
   const token = jwt.sign(res.locals.userInfo, secretKey);
   let secureBool = true;
-  if(process.env.NODE_ENV) secureBool = false;
+  if(process.env.NODE_ENV==='test') secureBool = false;
+  console.log(secureBool,'secure Bool');
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: secureBool,
