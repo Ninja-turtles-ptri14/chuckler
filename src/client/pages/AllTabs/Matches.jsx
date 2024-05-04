@@ -1,59 +1,54 @@
-import React, { useEffect, useState } from "react";
-import '../../stylesheets/matches.css';
+import React, { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext.jsx";
+import "../../stylesheets/matches.css";
 import MatchProfile from "../../components/MatchProfile.jsx";
 
+export default function Matches({ userData }) {
+  const { user } = useContext(AuthContext);
+  //   const [userData, setUserData] = useState(user); // Grabbing from auth context
+  const [matches, setMatches] = useState([]);
 
-export default function Matches({userData}) {
-    const [user, setUser] = useState(userData);
-    const [matches, setMatches] = useState([]);
-    useEffect(() => {
-        setMatches([]);
-        const getMatches = async () => {
-            try {
-                const response = await fetch(`/api/match/${user.id}`);
-                const parsedResponse = await response.json();
-                setMatches(parsedResponse)
-            
-            } catch (error) {console.log('Error trying to fetch matches', error)}
-        };
-        getMatches();
-    }, [])
+  const token = user.token;
 
-    console.log('USER MATCHES', user)
+  useEffect(() => {
+    const getMatches = async () => {
+      try {
+        const userMatches = await fetch(`/api/user/matches`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          Authorization: `Bearer ${token}`,
+        });
+        const parsedUserMatches = await userMatches.json();
+        setMatches(parsedUserMatches);
+      } catch (error) {
+        console.log("Error trying to fetch matches", error);
+      }
+    };
 
-    let renderMatches = [];
-    if (Array.isArray(matches)) {
-        matches.forEach((match, i) => {        
-            if (match.isOnline) {
-                renderMatches.push(
-                    <MatchProfile
-                        key={i}
-                        name={match.username}
-                        matchId={match.id}
-                        userId={user.id}
-                        status='Online'
-                    />
-                )
-            } else {
-                renderMatches.push(
-                    <MatchProfile
-                        key={i}
-                        name={match.username}
-                        matchId={match.id}
-                        userId={user.id}
-                        status='Offline'
-                    />
-                )
-            }
-            
-        })
-    } else {
-        renderMatches = matches;
-    }
-   
-    return (
-        <div id="matches">
-            {renderMatches}
-        </div> 
-    )
+    // Make fetch request
+    getMatches();
+  }, []);
+
+  console.log("USER MATCHES", matches);
+
+  let renderMatches = [];
+  if (Array.isArray(matches)) {
+    matches.forEach((match, i) => {
+      const { other_user } = match;
+      renderMatches.push(
+        <MatchProfile
+          key={i}
+          name={other_user.username}
+          matchId={match.id}
+          userId={other_user.id}
+          status={other_user.is_online ? "Online": "Offline"}
+          userPicture={other_user.user_picture}
+        />
+      );
+    });
+  } else {
+    renderMatches = matches;
+  }
+
+  return <div id="matches">{renderMatches}</div>;
 }
