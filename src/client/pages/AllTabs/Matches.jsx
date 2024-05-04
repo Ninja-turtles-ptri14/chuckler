@@ -34,14 +34,15 @@ export default function Matches({ userData }) {
   let renderMatches = [];
   if (Array.isArray(matches)) {
     matches.forEach((match, i) => {
-      const { other_user } = match;
+      const { user, other_user } = match;
       renderMatches.push(
         <MatchProfile
           key={i}
           name={other_user.username}
-          matchId={match.id}
-          userId={other_user.id}
-          status={other_user.is_online ? "Online": "Offline"}
+          matchId={match.match_id}
+          userId={user.id}
+          otherUserId={other_user.id}
+          status={other_user.is_online ? "Online" : "Offline"}
           userPicture={other_user.user_picture}
         />
       );
