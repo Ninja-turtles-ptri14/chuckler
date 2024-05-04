@@ -67,13 +67,12 @@ export default function Profile() {
               : userProfileIcon // Use the default profile icon
           }
           alt="user-profile"
-          style={{ width: "370px" }}
+          style={{ width: "350px" }}
         />
-
         <div>
-          <label htmlFor="image">Change profile picture</label>
-          <input id="image" type="file" accept="image/*" onChange={selectImg} />
-          <button onClick={changeProImg}>Ok</button>
+            <label htmlFor="image">Change profile picture:</label>
+            <input id="image" type="file" accept="image/*" onChange={selectImg} />
+            <button type="button" id="accept-img" onClick={changeProImg}>Accept Change</button>
         </div>
       </div>
       <div className="info">
