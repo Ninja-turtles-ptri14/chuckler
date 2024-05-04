@@ -77,8 +77,9 @@ app.use((err, req, res) => {
 // });
 
 // set up the server to listen for http requests
-app.listen(PORT, () => {
-  console.log(`App is listening on port ${PORT}`);
-});
-
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`App is listening on port ${PORT}`);
+  });
+}
 module.exports = app;
