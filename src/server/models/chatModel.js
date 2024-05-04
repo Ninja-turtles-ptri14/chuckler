@@ -3,7 +3,7 @@ const chatModel = {};
 
 chatModel.getMessages = async (match_id) => {
   const getMessagesQuery = `
-  SELECT *
+  SELECT from_user_id, message_content, created_at
   FROM messages
   WHERE match_id = $1`;
 

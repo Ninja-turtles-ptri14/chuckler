@@ -3,8 +3,6 @@ import React, { createContext, useState, useEffect } from 'react';
 import SentMessages from './SentMessages.jsx';
 import TypeMessages from './TypeMessage.jsx';
 
-
-
 /*
 Looks at the url parameters of the page and returns and object of the form:
 {user: {userId}, receiver: {receiverId}}
@@ -37,13 +35,6 @@ const ChatContainer = () => {
     `ws://localhost:3000/chat/${usersData.user}/${usersData.receiver}`
   );
 
-  console.log(
-    'helloooo',
-    socket,
-    usersData,
-    usersData.user,
-    usersData.receiver
-  );
   return (
     <div className="test">
       <div className="messages-component">

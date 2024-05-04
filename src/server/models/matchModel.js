@@ -88,12 +88,12 @@ matchModel.removeLike = async (id, unlikedUserId) => {
 
 matchModel.getMatchById = async (match_id) => {
   const getMatchByIdQuery = `
-  SELECT * 
+  SELECT *
   FROM matches
   WHERE match_id = $1`;
 
   const match = await db.query(getMatchByIdQuery, [match_id]);
-  return match.results[0];
+  return match.rows[0];
 };
 
 matchModel.deleteMatch = async (match_id) => {
@@ -103,7 +103,7 @@ matchModel.deleteMatch = async (match_id) => {
   RETURNING match_id, user_id_1, user_id_2`;
 
   const match = await db.query(deleteMatchQuery, [match_id]);
-  return match.results[0];
+  return match.rows[0];
 };
 
 module.exports = matchModel;

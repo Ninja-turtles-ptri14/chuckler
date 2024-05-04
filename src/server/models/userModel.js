@@ -95,4 +95,14 @@ userModel.setUserPicture = async (imageName, id) => {
   const result = await db.query(setUserPictureQuery, [imageName, id]);
   return result.rows[0];
 };
+
+userModel.getProfileById = async (id) => {
+  const getProfileQuery = `
+  SELECT id, bio, user_picture, username, is_online
+  FROM users WHERE id = $1`;
+
+  const result = await db.query(getProfileQuery, [id]);
+  return result.rows[0];
+};
+
 module.exports = userModel;
