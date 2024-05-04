@@ -5,9 +5,9 @@ const tokenController = require("../controllers/tokenController");
 const chatController = require("../controllers/chatController");
 const router = express.Router();
 
-const multer = require("multer");
+const multer = require('multer');
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({storage:storage});
 
 router.post(
   "/signup",
@@ -71,12 +71,12 @@ router.post(
 router.post(
   "/picture",
   tokenController.verifyToken,
-  upload.single("image"),
+  upload.single('image'),
   userController.setUserPicture,
-  (req, res) => {
-    return res.status(200).send("User picture updated successfully");
+  (req,res) => {
+    return res.status(200).send('User picture updated successfully');
   }
-);
+)
 // verifies if user has a jwt cookie
 router.get("/verify", tokenController.verifyToken, (req, res) => {
   return res.status(200).json("Requesting user is authorized");
