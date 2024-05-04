@@ -68,6 +68,11 @@ router.post(
     return res.status(200).json(res.locals.userInfo);
   }
 );
+
+router.get("/picture", userController.getPictureURL, (req, res) => {
+  return res.status(200).json(res.locals.user_picture);
+});
+
 router.post(
   "/picture",
   tokenController.verifyToken,

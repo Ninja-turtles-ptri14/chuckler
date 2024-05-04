@@ -109,6 +109,27 @@ userController.getUserMatches = async (req, res, next) => {
         match.user_id_1 === id ? match.user_id_2 : match.user_id_1;
       match.other_user = await userModel.getProfileById(other_user_id);
       match.user = await userModel.getProfileById(id);
+
+      // Replace encrypted image string with url
+      if (match.user.user_picture) {
+        const getObjectParams = {
+          Bucket: bucketName,
+          Key: match.user.user_picture,
+        };
+        const command = new GetObjectCommand(getObjectParams);
+        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        match.user.user_picture = url;
+      }
+      if (match.other_user.user_picture) {
+        const getObjectParams = {
+          Bucket: bucketName,
+          Key: match.other_user.user_picture,
+        };
+        const command = new GetObjectCommand(getObjectParams);
+        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        match.other_user.user_picture = url;
+      }
+
       matches.push(match);
     }
 
@@ -121,6 +142,27 @@ userController.getUserMatches = async (req, res, next) => {
       log: `Error in getUserMatches middleware: ${err}`,
       message: `Error getting user matches: ${err}`,
     });
+  }
+};
+
+userController.getPictureURL = async (req, res, next) => {
+  try {
+    const { userId } = req.query;
+    const user = await userModel.getProfileById(userId);
+    if (user && user.user_picture) {
+      const getObjectParams = {
+        Bucket: bucketName,
+        Key: user.user_picture,
+      };
+      const command = new GetObjectCommand(getObjectParams);
+
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+      res.locals.user_picture = url;
+    }
+
+    return next();
+  } catch (err) {
+    return next(new Error(err));
   }
 };
 
@@ -146,7 +188,7 @@ userController.getUserJokes = async (req, res, next) => {
 userController.getUserProfile = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-    
+
     const userInfo = await userModel.getUserById(id);
     console.log("userInfo: ", userInfo);
     res.locals.userInfo = userInfo;
@@ -162,7 +204,6 @@ userController.getUserProfile = async (req, res, next) => {
     res.locals.userInfo.user_picture = url;
 
     return next();
-
   } catch (err) {
     return next({
       log: `Error in getUserProfile middleware: ${err}`,
@@ -175,7 +216,7 @@ userController.setUserPicture = async (req, res, next) => {
   const id = res.locals.userInfo.id;
   const imageName = randomImageName();
   const buffer = await sharp(req.file.buffer)
-    .resize(400, 500, "contain")
+    .resize(300, 300, "contain")
     .toBuffer(); // resizes picture
 
   const params = {
