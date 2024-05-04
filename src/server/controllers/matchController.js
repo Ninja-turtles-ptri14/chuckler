@@ -54,7 +54,7 @@ matchController.createMatch = async (req, res, next) => {
 matchController.getPotentialMatch = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-    const fetchedUser = await matchModel.getPotentialMatch(id);
+    const fetchedUser = await matchModel.getPotentialMatch(id)
     const jokes = [];
 
     for(const j of fetchedUser['jokes_posted_id']) jokes.push(await jokeModel.getJokeById(j));

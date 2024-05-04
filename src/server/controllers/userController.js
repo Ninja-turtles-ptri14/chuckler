@@ -4,6 +4,7 @@ const jokeModel = require("../models/jokeModel");
 const matchModel = require("../models/matchModel");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+
 require("dotenv").config();
 const userController = {};
 //s3 stuff
@@ -104,17 +105,22 @@ userController.getUserMatches = async (req, res, next) => {
     const matches = [];
     // Get matches by user id
     const user_matchIds = await userModel.getUserMatches(id);
-    console.log("match ids: ", user_matchIds);
-    // for (const match_id of user_matchIds) {
-    //   const matchData = await matchModel.getMatchById(match_id);
-    //   console.log("matchid match data: ", matchData);
-    //   if (matchData) matches.push(matchData);
-    // }
+    for (const match_id of user_matchIds) {
+      const match = await matchModel.getMatchById(match_id);
 
-    res.locals.matches = user_matchIds;
+      // Assign identity
+      const other_user_id =
+        match.user_id_1 === id ? match.user_id_2 : match.user_id_1;
+      match.other_user = await userModel.getProfileById(other_user_id);
+      match.user = await userModel.getProfileById(id);
+      matches.push(match);
+    }
+
+    res.locals.matches = matches;
 
     return next();
   } catch (err) {
+    console.log("hit error here", err);
     return next({
       log: `Error in getUserMatches middleware: ${err}`,
       message: `Error getting user matches: ${err}`,
@@ -144,7 +150,7 @@ userController.getUserJokes = async (req, res, next) => {
 userController.getUserProfile = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-
+    
     const userInfo = await userModel.getUserById(id);
     console.log("userInfo: ", userInfo);
     res.locals.userInfo = userInfo;
@@ -160,6 +166,7 @@ userController.getUserProfile = async (req, res, next) => {
     res.locals.userInfo.user_picture = url;
 
     return next();
+
   } catch (err) {
     return next({
       log: `Error in getUserProfile middleware: ${err}`,
@@ -185,6 +192,7 @@ userController.setUserPicture = async (req, res, next) => {
   const command = new PutObjectCommand(params);
 
   await s3.send(command);
+
   await userModel.setUserPicture(imageName, id);
   return next();
 };

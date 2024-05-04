@@ -87,6 +87,7 @@ export default function Home () {
     useEffect(() => {
         getMatch();
     }, [])
+  
     const handleYesClick = async (e) => {
         e.preventDefault();
         try {

@@ -1,8 +1,14 @@
 const express = require("express");
 const path = require("path");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const configureSocket = require("./sockets/socket");
 require("dotenv").config();
+
+const { Server } = require("socket.io");
+const http = require("http");
+const chatModel = require("./models/chatModel");
+const jwt = require("jsonwebtoken");
 
 // Routers
 const jokeRouter = require("./routes/jokeRouter");
@@ -13,11 +19,29 @@ const PORT = process.env.PORT;
 
 // create the express server
 const app = express();
-const io = configureSocket(app);
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error("No JWT Token"));
+  console.log("token here socket: ", token);
+  return next();
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected: ", socket.id);
+});
 
 // parse incoming json
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 // serve static files from the build file
 app.use(express.static("build"));
 
@@ -38,7 +62,7 @@ app.use((err, req, res) => {
   const defaultErr = {
     log: "Express error handler caught unknown middleware error",
     status: 500,
-    message: { err: "An error occurred" },
+    message: "An error occurred",
   };
   const errorObj = Object.assign({}, defaultErr, err);
   console.log(errorObj.log);
