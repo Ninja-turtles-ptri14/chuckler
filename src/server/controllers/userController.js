@@ -4,6 +4,7 @@ const jokeModel = require("../models/jokeModel");
 const matchModel = require("../models/matchModel");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+
 require("dotenv").config();
 const userController = {};
 //s3 stuff
@@ -144,7 +145,7 @@ userController.getUserJokes = async (req, res, next) => {
 userController.getUserProfile = async (req, res, next) => {
   try {
     const { id } = res.locals.userInfo;
-
+    
     const userInfo = await userModel.getUserById(id);
     console.log("userInfo: ", userInfo);
     res.locals.userInfo = userInfo;
@@ -160,6 +161,7 @@ userController.getUserProfile = async (req, res, next) => {
     res.locals.userInfo.user_picture = url;
 
     return next();
+
   } catch (err) {
     return next({
       log: `Error in getUserProfile middleware: ${err}`,
@@ -185,6 +187,7 @@ userController.setUserPicture = async (req, res, next) => {
   const command = new PutObjectCommand(params);
 
   await s3.send(command);
+
   await userModel.setUserPicture(imageName, id);
   return next();
 };
