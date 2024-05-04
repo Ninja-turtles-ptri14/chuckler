@@ -107,6 +107,7 @@ userController.getUserMatches = async (req, res, next) => {
       const other_user_id =
         match.user_id_1 === id ? match.user_id_2 : match.user_id_1;
       match.other_user = await userModel.getProfileById(other_user_id);
+      match.user = await userModel.getProfileById(id);
       matches.push(match);
     }
 

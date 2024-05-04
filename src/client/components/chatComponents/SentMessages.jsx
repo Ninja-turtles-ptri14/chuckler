@@ -1,51 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
+import userProfile from '../../images/userProfile.png';
+import { formatDistanceToNow } from 'date-fns';
 
-const SentMessages = ({ usersData, socket }) => {
-  const [messages, setMessages] = useState([]);
-  const messagesEndRef = useRef(null);  //PALOMA
-  const [user, receiver] = [usersData.user, usersData.receiver];
+const SentMessages = ({ usersData, socket, messages }) => {
+  const messagesEndRef = useRef(null);
+  const [user, receiver] = [usersData.user, usersData.otherUser];
 
-  //paloma
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  //paloma
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-
-  // handle recieving a message
-  socket.onmessage = (e) => {
-    try {
-      const receivedMessages = JSON.parse(e.data);
-      const newMessage = receivedMessages[0];
-      console.log('NEW MESSAGE---->', receivedMessages[0].content)
-
-
-      if (Array.isArray(receivedMessages)) {
-        setMessages((previousMessages) => [...previousMessages, ...JSON.parse(e.data)]);
-      }
-      else throw new Error(`Failed to load new messages\n${receivedMessages}`);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // console.log('MESSAGES', messages, user)
-
   return (
-    <div className='chat-container'>
-      <div className='messages-container'>
+    <div className="chat-container">
+      <div className="messages-container">
         {messages.map((message, index) => {
-          const messageSender = message.from_user_id === user ? 'user' : 'sender';
-          return <div id='msg' key={index} className={`${messageSender}Message`}>{message.content}</div>;
-        })
-        }
+          const isUser = message.from_user_id === user;
+          const timestamp = formatDistanceToNow(new Date(message.created_at), { addSuffix: true });
+          return (
+            <div key={index} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-2`}>
+              <div className={`bg-gray-100 p-3 rounded-lg ${isUser ? 'bg-blue-300' : 'bg-white'}`}>
+                <p className="text-gray-800">{message.message_content}</p>
+                <p className="text-xs text-gray-400">{timestamp}</p>
+              </div>
+              {isUser && (
+                <img src={userProfile} alt="profile" className="w-8 h-8 rounded-full ml-2" />
+              )}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef}></div>
       </div>
     </div>
-
   );
 };
 
